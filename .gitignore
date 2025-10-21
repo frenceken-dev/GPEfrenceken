@@ -1,17 +1,18 @@
-# Entorno virtual
+# Ignorar el entorno virtual
 venv/
 env/
 .venv
+ikigai-venv/
 
-# Archivos de Python
+# Ignorar archivos de Python compilados
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Archivos de configuración local
+# Ignorar archivos de configuración local
 .env
 .vscode/
 
-# Archivos de sistema
+# Ignorar archivos de sistema
 .DS_Store
 Thumbs.db
