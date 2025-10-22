@@ -22,7 +22,7 @@ jobs:
 
     - name: Build with PyInstaller
       run: |
-        pyinstaller --onefile --windowed --name "Gestion_frenceken" `
+        pyinstaller --onefile --windowed --name "Gestion_frenceken"  --icon="iniciar.ico" `
         --add-data "ikigai_inventario.db;." `
         --add-data "__init__.py;." `
         --add-data "busqueda.py;." `
@@ -62,7 +62,7 @@ jobs:
 
     - name: Build with PyInstaller
       run: |
-        pyinstaller --onefile --windowed --name "Gestion_frenceken" \
+        pyinstaller --onefile --windowed --name "Gestion_frenceken" --icon="inicia.icns" \
         --add-data "ikigai_inventario.db:." \
         --add-data "__init__.py:." \
         --add-data "busqueda.py:." \
