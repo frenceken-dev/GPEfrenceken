@@ -3,7 +3,6 @@
 # Modulo Número: 1
 # Pantalla Inicial
 
-# main.py
 import tkinter as tk
 from tkinter import messagebox, ttk
 from PIL import Image, ImageTk
@@ -56,6 +55,7 @@ class PantallaPrincipal:
             
         # Se llama a la pantalla de login
         self.pantalla_login()
+        
                 
     # Pantal para el inicio de sesión
     def pantalla_login(self):
@@ -74,8 +74,7 @@ class PantallaPrincipal:
         except Exception as e:
             print(f"Error al cargar la imagen: {e}")
             self.imagen_tk = tk.Label(self.root, text="Ikigai Designs", font=("Arial", 24), bg="#f0f0f0").pack(pady=20)
-            
-            
+                
         control_frame = tk.Frame(self.root, bg="#a0b9f0", padx=20, pady=50)
         control_frame.pack(fill=tk.BOTH, expand=True)
             
