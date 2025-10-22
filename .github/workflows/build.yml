@@ -22,21 +22,21 @@ jobs:
 
     - name: Build with PyInstaller
       run: |
-        pyinstaller --onefile --windowed --name "Gestion_frenceken" \
-        --add-data "ikigai_inventario.db;." \
-        --add-data "__init__.py;." \
-        --add-data "busqueda.py;." \
-        --add-data "costos_ganancias.py;." \
-        --add-data "crea_factura_nota_entrega.py;." \
-        --add-data "db.py;." \
-        --add-data "eliminar_datos.py;." \
-        --add-data "gestion_usuarios.py;." \
-        --add-data "impresora.py;." \
-        --add-data "inventario.py;." \
-        --add-data "menus.py;." \
-        --add-data "modulo_main.py;." \
-        --add-data "productos.py;." \
-        --add-data "registrar_nuevo_proveedor.py;." \
+        pyinstaller --onefile --windowed --name "Gestion_frenceken" `
+        --add-data "ikigai_inventario.db;." `
+        --add-data "__init__.py;." `
+        --add-data "busqueda.py;." `
+        --add-data "costos_ganancias.py;." `
+        --add-data "crea_factura_nota_entrega.py;." `
+        --add-data "db.py;." `
+        --add-data "eliminar_datos.py;." `
+        --add-data "gestion_usuarios.py;." `
+        --add-data "impresora.py;." `
+        --add-data "inventario.py;." `
+        --add-data "menus.py;." `
+        --add-data "modulo_main.py;." `
+        --add-data "productos.py;." `
+        --add-data "registrar_nuevo_proveedor.py;." `
         modulo_main.py
 
     - name: Upload artifact
@@ -72,10 +72,10 @@ jobs:
         --add-data "eliminar_datos.py:." \
         --add-data "gestion_usuarios.py:." \
         --add-data "impresora.py:." \
-        --add-data "inventario.py;." \
+        --add-data "inventario.py:." \
         --add-data "menus.py:." \
         --add-data "modulo_main.py:." \
-        --add-data "productos.py;." \
+        --add-data "productos.py:." \
         --add-data "registrar_nuevo_proveedor.py:." \
         modulo_main.py
 
