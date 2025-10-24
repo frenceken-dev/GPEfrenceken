@@ -64,6 +64,7 @@ class PantallaPrincipal:
             widget.destroy()
             
         try:
+            # Redimensión de la Imagen de la pantalla login
             self.imagen = Image.open("Img/logo/logo_ikigai.png")
             ancho_original, alto_original = self.imagen.size
             proporcion = min(300 / ancho_original, 300 / alto_original)
