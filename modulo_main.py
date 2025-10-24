@@ -13,6 +13,7 @@ from gestion_usuarios import gestion_usuarios
 from costos_ganancias import abrir_modulo_costos_ganancias
 from crea_factura_nota_entrega import VentanaVentas
 from eliminar_datos import eliminar_datos
+from info_tienda import info_tienda
 
 class PantallaPrincipal:
     def __init__(self, root):
@@ -225,6 +226,7 @@ class PantallaPrincipal:
             ).pack(pady=100)
         
         if self.rol == "administrador":
+            # Crear usuario.
             tk.Button(
                 frame_botones,
                 text="Crear un usuario", 
@@ -236,6 +238,20 @@ class PantallaPrincipal:
                 activebackground="#2ECC71",
                 activeforeground="white",
                 command=lambda: gestion_usuarios(self.root, self.mostrar_menu_principal, self.imagen_panel_tk),
+                width=18, borderwidth=2
+            ).pack(pady=10)
+            # Agregar la información de la tienda.
+            tk.Button(
+                frame_botones,
+                text="Tu Tienda", 
+                bg="#00285C",
+                fg="white",
+                font=("Arial", 11, "bold"),
+                bd=0,
+                relief=tk.FLAT,
+                activebackground="#2ECC71",
+                activeforeground="white",
+                command=lambda: info_tienda(self.root, self.mostrar_menu_principal, self.imagen_panel_tk),
                 width=18, borderwidth=2
             ).pack(pady=10)
             

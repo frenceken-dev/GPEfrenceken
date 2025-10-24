@@ -985,7 +985,32 @@ def obtener_costo_actual_lote(id_lote):
     return costo_actual[0] if costo_actual else 0.0
 
 
-import sqlite3
+def guardar_info_tienda(tienda, direccion, id_fiscal, telefono, correo):
+    conn = sqlite3.connect('ikigai_inventario.db')
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO Tienda (nombre, direccion, identificacion_fiscal, telefono, email) VALUES (?, ?, ?, ?, ?)",
+                   (tienda, direccion, id_fiscal, telefono, correo))
+    conn.commit()
+    conn.close()
+    
+
+def datos_registrados_tienda():
+    conn = sqlite3.connect('ikigai_inventario.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT id_tienda, direccion, telefono, email FROM Tienda WHERE id_tienda = 1")
+    datos_tienda = cursor.fetchall()
+    conn.close()
+    print(datos_tienda)
+    return datos_tienda
+
+
+def actualizar_datos_tienda(direccion, telefono, correo, id_tienda):
+    conn = sqlite3.connect('ikigai_inventario.db')
+    cursor = conn.cursor()
+    cursor.execute("""UPDATE Tienda SET direccion = ?, telefono = ?,email = ? WHERE id_tienda = ?""", (direccion, telefono, correo, id_tienda ))
+    conn.commit()
+    conn.close()    
+
 
 def limpiar_base_datos():
     conn = sqlite3.connect("ikigai_inventario.db")
