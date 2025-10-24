@@ -28,6 +28,7 @@ jobs:
         --add-data "eliminar_datos.py;." `
         --add-data "gestion_usuarios.py;." `
         --add-data "impresora.py;." `
+        --add-data "info_tienda.py;." `
         --add-data "inventario.py;." `
         --add-data "menus.py;." `
         --add-data "modulo_main.py;." `
@@ -68,6 +69,7 @@ jobs:
         --add-data "gestion_usuarios.py:." \
         --add-data "impresora.py:." \
         --add-data "inventario.py:." \
+        --add-data "info_tienda.py;." \
         --add-data "menus.py:." \
         --add-data "modulo_main.py:." \
         --add-data "productos.py:." \
