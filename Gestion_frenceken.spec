@@ -1,6 +1,8 @@
 # -*- mode: python ; coding: utf-8 -*-
-import sys
 
+block_cipher = None
+
+# Configuración para macOS con arquitectura x86_64
 a = Analysis(
     ['modulo_main.py'],
     pathex=['.'],
@@ -37,14 +39,7 @@ a = Analysis(
 
 pyz = PYZ(a.pure)
 
-# Determinar el icono según el sistema operativo
-if sys.platform == 'win32':
-    icon_path = 'iniciar.ico'
-elif sys.platform == 'darwin':
-    icon_path = 'iniciar.icns'
-else:
-    icon_path = None  # Para otros sistemas operativos
-
+# Configuración del ejecutable para macOS (x86_64)
 exe = EXE(
     pyz,
     a.scripts,
@@ -55,10 +50,12 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=False,
     upx_exclude=[],
     runtime_tmpdir=None,
     console=False,
-    icon=icon_path,
-    target_arch='universal2'  # Construye para ambas arquitecturas (arm64 y x86_64)
+    icon='iniciar.icns',
+    osx_bundle=True,
+    bundle_identifier='com.frenceken.gestion',
 )
+
