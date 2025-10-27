@@ -60,4 +60,5 @@ exe = EXE(
     runtime_tmpdir=None,
     console=False,
     icon=icon_path,
+    target_arch='universal2'  # Construye para ambas arquitecturas (arm64 y x86_64)
 )
