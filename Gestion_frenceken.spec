@@ -2,12 +2,9 @@
 import sys
 import os
 
-# Asegúrate de que las rutas sean absolutas o relativas al directorio del script
-base_path = os.path.dirname(os.path.abspath(__file__))
-
 a = Analysis(
     ['modulo_main.py'],
-    pathex=[base_path],
+    pathex=['.'],
     binaries=[],
     datas=[
         ('ikigai_inventario.db', '.'),
@@ -43,9 +40,9 @@ pyz = PYZ(a.pure)
 
 # Determinar el icono según el sistema operativo
 if sys.platform == 'win32':
-    icon_path = os.path.join(base_path, 'iniciar.ico')
+    icon_path = 'iniciar.ico'
 elif sys.platform == 'darwin':
-    icon_path = os.path.join(base_path, 'iniciar.icns')
+    icon_path = 'iniciar.icns'
 else:
     icon_path = None  # Para otros sistemas operativos
 
