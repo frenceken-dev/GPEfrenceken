@@ -1,6 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
 import sys
-import os
 
 a = Analysis(
     ['modulo_main.py'],
@@ -61,14 +60,4 @@ exe = EXE(
     runtime_tmpdir=None,
     console=False,
     icon=icon_path,
-)
-
-coll = COLLECT(
-    exe,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
-    strip=False,
-    upx=True,
-    name='Gestion_frenceken'
 )
