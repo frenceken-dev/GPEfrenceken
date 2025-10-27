@@ -2,7 +2,8 @@
 
 import tkinter as tk
 from tkinter import messagebox, simpledialog, ttk
-from db import buscar_en_bd, obtener_materiales
+from db import buscar_en_bd, obtener_materiales, encotrar_notas_entrega
+from recursos import LOGO_PATH
 
 
 def busqueda_articulos(root, volver_menu, imagen_panel_tk, imagen_buscar_tk, usuario_actual):
@@ -240,20 +241,13 @@ def mostrar_resultados(resultados, tipo_busqueda, root, usuario_actual, volver_m
         
         # Función para cargar las notas de entrega
         def cargar_notas():
-            import sqlite3
             
             for item in tree.get_children():
                 tree.delete(item)
-            conn = sqlite3.connect("ikigai_inventario.db")
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT ne.id_nota_entrega, ne.fecha, c.nombre, ne.total, ne.estado
-                FROM NotasEntrega ne
-                JOIN Clientes c ON ne.id_cliente = c.id_cliente
-            """)
-            for row in cursor.fetchall():
+            notas_entrega = encotrar_notas_entrega()
+            
+            for row in notas_entrega:
                 tree.insert("", tk.END, values=row)
-            conn.close()
 
         # Botón para cargar las notas de entrega
         tk.Button(resultados_window, text="Cargar Notas de Entrega", command=cargar_notas).pack(side="left", padx=5, pady=5)
@@ -314,7 +308,7 @@ def mostrar_resultados(resultados, tipo_busqueda, root, usuario_actual, volver_m
 
         # Generar el PDF
         from impresora import ImpresorPDF
-        logo_path = "Img/logo/logo_ikigai.png"  # Asegúrate de que esta ruta sea correcta
+        logo_path = LOGO_PATH  # Asegúrate de que esta ruta sea correcta
         col_widths = [100, 100, 100, 100, 100, 100, 100, 100, 100]  # Ajusta según tus necesidades
 
         ImpresorPDF.generar_pdf(

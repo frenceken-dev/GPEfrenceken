@@ -91,7 +91,7 @@ def gestion_usuarios(root, mostrar_menu_principal, imagen_panel_tk):#, rol):
         activeforeground="white",
         command=lambda: formulario_buscar_usuario(root, mostrar_menu_principal, imagen_panel_tk),
         width=18
-    ).pack(pady=10)
+    ).pack(pady=80)
     
     tk.Button(
         frame_menu,
@@ -105,7 +105,7 @@ def gestion_usuarios(root, mostrar_menu_principal, imagen_panel_tk):#, rol):
         activeforeground="white",
     command=mostrar_menu_principal,
         width=18
-    ).pack(pady=10)
+    ).pack(side=tk.LEFT, padx=30, pady=40)
 
 # Formulario para la busqueda de usuario.
 def formulario_buscar_usuario(root, volver_menu, imagen_panel_tk):
@@ -287,6 +287,11 @@ def formulario_editar_usuario(root, volver_menu, id_usuario, nombre_usuario, rol
     # Crear un frame para el formulario de edición
     form_frame = tk.Frame(root, bg="#a0b9f0", padx=20, pady=20)
     form_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+    
+    # Frame para los botones (lado izquierdo)
+    frame_botones = tk.Frame(root, bg="#2C3E50", width=200, height=800, bd=3, borderwidth=3, relief="solid")
+    frame_botones.pack(side=tk.LEFT, fill=tk.Y)
+    frame_botones.pack_propagate(False)
 
     # Campos para editar el usuario
     tk.Label(form_frame, text="Nombre de Usuario:", bg="#a0b9f0").grid(row=0, column=0, sticky="e", pady=5)
@@ -330,7 +335,7 @@ def formulario_editar_usuario(root, volver_menu, id_usuario, nombre_usuario, rol
               ).grid(row=3, column=0, columnspan=2, pady=10)
 
     # Botón para volver al menú
-    tk.Button(form_frame, 
+    tk.Button(frame_botones, 
             text="Volver al Menú", 
             command=volver_menu, 
             bg="#913131",
@@ -340,4 +345,4 @@ def formulario_editar_usuario(root, volver_menu, id_usuario, nombre_usuario, rol
             relief=tk.FLAT,
             activebackground="#2ECC71",
             activeforeground="white",
-              ).grid(row=4, column=0, columnspan=2, pady=10)
+              ).pack(side=tk.LEFT, padx=30, pady=40)

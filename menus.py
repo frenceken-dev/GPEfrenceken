@@ -6,6 +6,7 @@ from inventario import ingresar_inventario
 from productos import crear_producto
 from busqueda import busqueda_articulos #menu_buscar_articulo, formulario_buscar_por_proveedor, formulario_buscar_por_factura, formulario_buscar_por_codigo, formulario_buscar_por_articulo
 from registrar_nuevo_proveedor import nuevo_proveedor
+from incrementar_productos_inventario import VentanaIncrementarStock
 
 # menus.py
 def menu_gestion_inventario(root, mostrar_menu_principal, imagen_panel_tk, rol, imagen_tk):
@@ -62,7 +63,7 @@ def menu_gestion_inventario(root, mostrar_menu_principal, imagen_panel_tk, rol, 
             activeforeground="white",
             command=lambda: ingresar_inventario(frame_contenido, frame_botones, imagen_panel_tk, lambda: menu_gestion_inventario(root, mostrar_menu_principal, imagen_panel_tk)),
             width=18
-        ).pack(pady=10)
+        ).pack(pady=15)
         tk.Button(
             frame_botones,
             text="Crear Producto",
@@ -75,7 +76,7 @@ def menu_gestion_inventario(root, mostrar_menu_principal, imagen_panel_tk, rol, 
             activeforeground="white",
             command=lambda: crear_producto(frame_contenido, lambda: menu_gestion_inventario(root, mostrar_menu_principal, imagen_panel_tk)),
             width=18
-        ).pack(pady=10)
+        ).pack(pady=15)
         tk.Button(
             frame_botones,
             text="Registrar Proveedor",
@@ -88,7 +89,20 @@ def menu_gestion_inventario(root, mostrar_menu_principal, imagen_panel_tk, rol, 
             activeforeground="white",
             command=lambda: nuevo_proveedor(frame_contenido, lambda: menu_gestion_inventario(root, mostrar_menu_principal)),
             width=18
-        ).pack(pady=10)
+        ).pack(pady=15)
+        tk.Button(
+            frame_botones,
+            text="Aumentar stock",
+            bg="#0474A0",
+            fg="white",
+            font=("Arial", 11, "bold"),
+            bd=0,
+            relief=tk.FLAT,
+            activebackground="#2ECC71",
+            activeforeground="white",
+            command=lambda: VentanaIncrementarStock(root, frame_contenido, lambda: menu_gestion_inventario(root, mostrar_menu_principal)),
+            width=18
+        ).pack(pady=15)
         tk.Button(
             frame_botones,
             text="Menú Principal",
@@ -101,7 +115,7 @@ def menu_gestion_inventario(root, mostrar_menu_principal, imagen_panel_tk, rol, 
             activeforeground="white",
             command=mostrar_menu_principal,
             width=18
-        ).pack(pady=10)
+        ).pack(side=tk.LEFT, padx=30, pady=40)
     
     # Botones del submenú nivel usuario.  PENDIENTE PARA CAMBIOS
     elif rol == "usuario":
@@ -129,7 +143,7 @@ def menu_gestion_inventario(root, mostrar_menu_principal, imagen_panel_tk, rol, 
             activeforeground="white",
             command=lambda: ingresar_inventario(frame_contenido, lambda: menu_gestion_inventario(root, mostrar_menu_principal)),
             width=18
-        ).pack(pady=10)
+        ).pack(pady=15)
         
         tk.Button(
             frame_botones,
@@ -143,7 +157,7 @@ def menu_gestion_inventario(root, mostrar_menu_principal, imagen_panel_tk, rol, 
             activeforeground="white",
             command=lambda: crear_producto(frame_contenido, lambda: menu_gestion_inventario(root, mostrar_menu_principal, imagen_panel_tk)),
             width=18
-        ).pack(pady=10)
+        ).pack(pady=15)
         
         tk.Button(
             frame_botones,
@@ -157,7 +171,7 @@ def menu_gestion_inventario(root, mostrar_menu_principal, imagen_panel_tk, rol, 
             activeforeground="white",
             command=lambda: nuevo_proveedor(frame_contenido, lambda: menu_gestion_inventario(root, mostrar_menu_principal)),
             width=18
-        ).pack(pady=10)
+        ).pack(pady=15)
         
         tk.Button(
             frame_botones,
@@ -171,5 +185,5 @@ def menu_gestion_inventario(root, mostrar_menu_principal, imagen_panel_tk, rol, 
             activeforeground="white",
             command=mostrar_menu_principal,
             width=18
-        ).pack(pady=10)
+        ).pack(side=tk.LEFT, padx=30, pady=40)
     

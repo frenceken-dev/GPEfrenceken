@@ -2,18 +2,22 @@
 # Modulo-main
 # Modulo Número: 1
 # Pantalla Inicial
-
+import sys
+import os
 import tkinter as tk
 from tkinter import messagebox, ttk
 from PIL import Image, ImageTk
 from menus import menu_gestion_inventario
 from busqueda import busqueda_articulos
-from db import validar_credenciales, obtener_nombres_usuarios
+from db import validar_credenciales, obtener_nombres_usuarios, verificar_stock_bajo
 from gestion_usuarios import gestion_usuarios
 from costos_ganancias import abrir_modulo_costos_ganancias
 from crea_factura_nota_entrega import VentanaVentas
 from eliminar_datos import eliminar_datos
 from info_tienda import info_tienda
+from recursos import LOGO_PATH, IMAGEN_BUSQUEDA_PATH
+from alerta_stock import VentanaConfigurarUmbrales
+
 
 class PantallaPrincipal:
     def __init__(self, root):
@@ -27,10 +31,11 @@ class PantallaPrincipal:
         y = (screen_height - window_height) // 2
         self.root.geometry(f"{screen_width}x{screen_height}+{x}+{y}")
         self.root.configure(bg="#a0b9f0")
-
+    
         # Cargar logo
         try:
-            self.imagen = Image.open("Img/logo/logo_ikigai.png")
+            self.logo_path = LOGO_PATH
+            self.imagen = Image.open(self.logo_path)
             self.imagen_resize = self.imagen.resize((300, 300), Image.LANCZOS)
             self.imagen_tk = ImageTk.PhotoImage(self.imagen_resize)
         except Exception as e:
@@ -39,7 +44,7 @@ class PantallaPrincipal:
             
         # Cargar logo para redimencionar a 50px
         try:
-            self.imagen_panel = Image.open("Img/logo/logo_ikigai.png")
+            self.imagen_panel = Image.open(self.logo_path)
             self.imagen_panel_resize = self.imagen_panel.resize((60, 60), Image.LANCZOS)
             self.imagen_panel_tk = ImageTk.PhotoImage(self.imagen_panel_resize)
         except Exception as e:
@@ -48,7 +53,8 @@ class PantallaPrincipal:
             
         # Cargar imagen de busqueda a 200px
         try:
-            self.imagen_buscar = Image.open("Img/busqueda/img-busqueda.png")
+            self.img_busqueda = IMAGEN_BUSQUEDA_PATH
+            self.imagen_buscar = Image.open(self.img_busqueda)
             self.imagen_buscar_resize = self.imagen_buscar.resize((200, 200), Image.LANCZOS)
             self.imagen_buscar_tk = ImageTk.PhotoImage(self.imagen_buscar_resize)
         except Exception as e:
@@ -66,7 +72,7 @@ class PantallaPrincipal:
             
         try:
             # Redimensión de la Imagen de la pantalla login
-            self.imagen = Image.open("Img/logo/logo_ikigai.png")
+            self.imagen = Image.open(self.logo_path)
             ancho_original, alto_original = self.imagen.size
             proporcion = min(300 / ancho_original, 300 / alto_original)
             nuevo_ancho = int(ancho_original * proporcion)
@@ -128,12 +134,113 @@ class PantallaPrincipal:
         # Vincular tecla Enter con el bóton Iniciar Sesión
         self.root.bind("<Return>", lambda event: validar_login())
         
-        
+    # Alertas de Stock
+    def mostrar_alertas_stock_bajo(self):
+        alertas = verificar_stock_bajo()
+        if not alertas:
+            messagebox.showinfo("Información", "No hay advertencias de stock bajo.")
+            return
+
+        # Crear un Toplevel para mostrar las alertas
+        toplevel = tk.Toplevel(self.root)
+        toplevel.title("Advertencias de Stock Bajo")
+        toplevel.geometry("500x400")
+        toplevel.resizable(False, False)
+
+        # Frame para el contenido del Toplevel
+        frame_contenido = tk.Frame(toplevel, bg="#f0f0f0", padx=20, pady=20)
+        frame_contenido.pack(fill=tk.BOTH, expand=True)
+
+        # Título
+        title_label = tk.Label(
+            frame_contenido,
+            text="Advertencias de Stock Bajo",
+            font=("Arial", 14, "bold"),
+            bg="#f0f0f0",
+            fg="#FF5733"
+        )
+        title_label.pack(pady=10)
+
+        # Frame para las alertas
+        frame_alertas = tk.Frame(frame_contenido, bg="#f0f0f0")
+        frame_alertas.pack(fill=tk.BOTH, expand=True)
+
+        # Scrollbar para las alertas
+        canvas = tk.Canvas(frame_alertas, bg="#f0f0f0")
+        scrollbar = tk.Scrollbar(frame_alertas, orient="vertical", command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas, bg="#f0f0f0")
+
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(
+                scrollregion=canvas.bbox("all")
+            )
+        )
+
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        # Mostrar las alertas en el frame scrollable
+        for alerta in alertas:
+            if alerta['tipo'] == 'material':
+                alerta_label = tk.Label(
+                    scrollable_frame,
+                    text=(
+                        f"Material: {alerta['nombre']}\n"
+                        f"Tipo: {alerta['tipo_material']}\n"
+                        f"Tamaño: {alerta['tamano']}\n"
+                        f"Color: {alerta['color']}\n"
+                        f"Cantidad: {alerta['cantidad']}\n"
+                    ),
+                    font=("Arial", 10),
+                    bg="#f0f0f0",
+                    fg="#333333",
+                    justify=tk.LEFT,
+                    pady=5
+                )
+                alerta_label.pack(fill=tk.X, padx=10, pady=5)
+
+            elif alerta['tipo'] == 'producto':
+                alerta_label = tk.Label(
+                    scrollable_frame,
+                    text=(
+                        f"Producto: Código {alerta['codigo']}\n"
+                        f"Tipo: {alerta['tipo_producto']}\n"
+                        f"Cantidad: {alerta['cantidad']}\n"
+                    ),
+                    font=("Arial", 10),
+                    bg="#f0f0f0",
+                    fg="#333333",
+                    justify=tk.LEFT,
+                    pady=5
+                )
+                alerta_label.pack(fill=tk.X, padx=10, pady=5)
+
+        # Botón para cerrar el Toplevel
+        tk.Button(
+            frame_contenido,
+            text="Cerrar",
+            bg="#FF5733",
+            fg="white",
+            font=("Arial", 10, "bold"),
+            bd=0,
+            relief=tk.FLAT,
+            activebackground="#FF8C61",
+            command=toplevel.destroy,
+            width=10
+        ).pack(pady=10)
+            
+     
     def mostrar_menu_principal(self):
         # Limpiar ventana
         for widget in self.root.winfo_children():
             widget.destroy()
-            
+        # Verificar bajo stock de Materiales y Productos  
+        alertas = verificar_stock_bajo()
+        
         # Se modifica el título con el usuario y su rol
         self.root.title(f"Sistema de Inventario - usuario: {self.usuario}-{self.rol}")
         
@@ -145,6 +252,22 @@ class PantallaPrincipal:
         # Frame del Titulo
         frame_titulo = tk.Frame(root, bg="#a0b9f0")
         frame_titulo.pack(side=tk.TOP, fill=tk.X, pady=15)
+        
+        # Botón de advertencia de stock bajo (solo si hay alertas)
+        if alertas:
+            tk.Button(
+                self.root,
+                text="⚠️ Advertencia de Stock",
+                bg="#FF5733",  # Color llamativo para advertencia
+                fg="white",
+                font=("Arial", 11, "bold"),
+                bd=0,
+                relief=tk.FLAT,
+                activebackground="#FF8C61",
+                activeforeground="white",
+                command=self.mostrar_alertas_stock_bajo,
+                width=18, borderwidth=2
+            ).pack(pady=10)
         
         # Título
         title_label = tk.Label(
@@ -251,7 +374,21 @@ class PantallaPrincipal:
                 relief=tk.FLAT,
                 activebackground="#2ECC71",
                 activeforeground="white",
-                command=lambda: info_tienda(self.root, self.mostrar_menu_principal, self.imagen_panel_tk),
+                command=lambda: info_tienda(self.root, self.mostrar_menu_principal, self.imagen_tk, self.imagen_panel_tk),
+                width=18, borderwidth=2
+            ).pack(pady=10)
+            
+            tk.Button(
+                frame_botones,
+                text="Crear alertar de Stock", 
+                bg="#FF0A68",
+                fg="white",
+                font=("Arial", 11, "bold"),
+                bd=0,
+                relief=tk.FLAT,
+                activebackground="#2ECC71",
+                activeforeground="white",
+                command=lambda: VentanaConfigurarUmbrales(self.root, self.mostrar_menu_principal),
                 width=18, borderwidth=2
             ).pack(pady=10)
             
@@ -277,7 +414,7 @@ class PantallaPrincipal:
             tk.Label(frame_imagen, image=self.imagen_tk, bg="#a0b9f0").pack(pady=20)
         else:
             tk.Label(frame_imagen, text="Ikigai Designs", font=("Arial", 24), bg="#a0b9f0").pack(pady=20)
-            
+        
 
 # Inicializador de la App.
 if __name__ == "__main__":

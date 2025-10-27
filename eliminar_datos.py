@@ -111,7 +111,7 @@ def eliminar_datos(root, volver_menu, imagen_tk, imagen_panel_tk):
             activeforeground="white",
             command=volver_menu, 
             width=20, 
-            ).pack(pady=15)
+            ).pack(side=tk.LEFT, padx=30, pady=40)
     
     
 # Código para eliminar proveedores.

@@ -7,8 +7,9 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 import pytz
 from tkinter import messagebox, Toplevel
+from recursos import DB_PATH
 
-
+db_path = DB_PATH
 # database
 def init_db():
     pass
@@ -16,7 +17,7 @@ def init_db():
 
 # Registrar un nuevo Proveedor.
 def insertar_proveedor(nombre, contacto, telefono, email, direccion):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('''
         INSERT INTO Proveedores (nombre, contacto, telefono, email, direccion)
@@ -28,7 +29,7 @@ def insertar_proveedor(nombre, contacto, telefono, email, direccion):
 
 # Obtener todos los Proveedores .
 def obtener_proveedores():
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('SELECT nombre FROM Proveedores')
     proveedores = cursor.fetchall()
@@ -38,7 +39,7 @@ def obtener_proveedores():
 
 # Obtener ID del proveedor por su nombre. 
 def obtener_id_proveedor_por_nombre(nombre_proveedor):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('''
         SELECT id_proveedor FROM Proveedores
@@ -51,7 +52,7 @@ def obtener_id_proveedor_por_nombre(nombre_proveedor):
 
 # Obtener ID de la Factura por su numero. 
 def obtener_id_factura_por_numero(numero_factura):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('''
         SELECT id_factura FROM Facturas
@@ -64,7 +65,7 @@ def obtener_id_factura_por_numero(numero_factura):
 
 # Obtener ID del material por su código.
 def obtener_id_material_por_codigo(codigo):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('SELECT id_material FROM Materiales WHERE codigo = ?', (codigo,))
     resultado = cursor.fetchone()
@@ -74,7 +75,7 @@ def obtener_id_material_por_codigo(codigo):
 
 # Obtener ID del nuevo producto por su código.
 def obtener_id_producto_por_codigo(codigo):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('SELECT id_producto FROM Productos WHERE codigo = ?', (codigo,))
     resultado = cursor.fetchone()
@@ -84,7 +85,7 @@ def obtener_id_producto_por_codigo(codigo):
 
 # Ingresar los Items de las facturas.
 def insertar_material(codigo, nombre, tipo, tamaño, color, stock, precio, costo_unitario, id_proveedor):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     try:
     # Obtener el id_proveedor usando el nombre
@@ -105,7 +106,7 @@ def insertar_material(codigo, nombre, tipo, tamaño, color, stock, precio, costo
 
 # Ingresar datos Basicos de la factura para el ingreso de Items.
 def insertar_factura(numero_factura, fecha, nombre_proveedor):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Obtener el id_proveedor usando el nombre
@@ -132,7 +133,7 @@ def insertar_factura(numero_factura, fecha, nombre_proveedor):
 
 #  Obtener los detalles de una factura.
 def insertar_detalle_factura(id_factura, id_material, stock,  precio, costo_unitario):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('''
         INSERT INTO Detalle_Factura (id_factura, id_material, stock, Precio, costo_unitario)
@@ -144,7 +145,7 @@ def insertar_detalle_factura(id_factura, id_material, stock,  precio, costo_unit
     
 # Se registra un nuevo producto creado por Ikigai GmbH.
 def insertar_producto(codigo, nombre, tipo, costo_producto, precio_venta, materiales_usados, tiempo_fabricacion, cantidad, descripcion):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     fecha_registro = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     cursor.execute('''
@@ -157,7 +158,7 @@ def insertar_producto(codigo, nombre, tipo, costo_producto, precio_venta, materi
 
 # Obtener los materiales empleados en un producto creado.
 def insertar_detalle_producto(id_producto, id_material, cantidad, tipo, tamaño):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('''
         INSERT INTO Detalle_Producto
@@ -170,7 +171,7 @@ def insertar_detalle_producto(id_producto, id_material, cantidad, tipo, tamaño)
     
 # Obtener Materiales para creacion de producto.
 def obtener_materiales():
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM Materiales')
     materiales = cursor.fetchall()
@@ -180,7 +181,7 @@ def obtener_materiales():
 
 # Obtener el nombre del material por el código
 def obtener_nombre_material_por_codigo(codigo_material):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('SELECT nombre FROM Materiales WHERE codigo = ?', (codigo_material,))
     resultado = cursor.fetchone()
@@ -191,7 +192,7 @@ def obtener_nombre_material_por_codigo(codigo_material):
 # Obtener código del materia por su nombre
 def obtener_codigo_material_por_nombre(nombre_material):
     print("Nombre para obtener el código del material: ", nombre_material)
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('SELECT codigo FROM Materiales WHERE nombre = ?', (nombre_material,))
     resultado = cursor.fetchone()
@@ -201,7 +202,7 @@ def obtener_codigo_material_por_nombre(nombre_material):
 
 # Materales por nombre, tipo, tamaño para crear producto nuevo.
 def obtener_codigo_material_por_nombre_color_tipo_tamaño(nombre, color, tipo, tamaño):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('''
         SELECT codigo
@@ -216,7 +217,7 @@ def obtener_codigo_material_por_nombre_color_tipo_tamaño(nombre, color, tipo, t
 # Obtener el costo Unitario del material
 def obtener_costo_unitario_material(codigo_material):
     print("Código para obtener costo unitario del material: ",codigo_material)
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('SELECT costo_unitario FROM Materiales WHERE codigo = ?', (codigo_material,))
     resultado = cursor.fetchone()
@@ -226,7 +227,7 @@ def obtener_costo_unitario_material(codigo_material):
 
 # Función para actualizar el stock de un material en la base de datos
 def actualizar_stock_material(codigo, cantidad):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('''
         UPDATE Materiales
@@ -239,7 +240,7 @@ def actualizar_stock_material(codigo, cantidad):
 
 # Obtener los productos ya creados.
 def obtener_productos():
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM Productos')
     productos = cursor.fetchall()
@@ -249,7 +250,7 @@ def obtener_productos():
 
 # Seleccionar el color del material por nombre
 def obtener_color_por_material(nombre_material):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('''
         SELECT DISTINCT color
@@ -263,7 +264,7 @@ def obtener_color_por_material(nombre_material):
 
 # Seleccionar el tipo del material por nombre
 def obtener_tipos_por_material_y_color(nombre_material, color_material):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('''
         SELECT DISTINCT tipo
@@ -277,7 +278,7 @@ def obtener_tipos_por_material_y_color(nombre_material, color_material):
 
 # Obtener tipo y tamaño de un material.
 def obtener_tamaños_por_material_color_tipo(nombre_material, color_material, tipo_material):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('''
         SELECT DISTINCT tamaño
@@ -292,7 +293,7 @@ def obtener_tamaños_por_material_color_tipo(nombre_material, color_material, ti
 
 # Datos seleccionados para el calculo de precio de venta
 def obtener_productos_para_costoventa():
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('''SELECT id_producto, codigo, costo_producto FROM Productos''')
     _3_productos = cursor.fetchall()
@@ -302,7 +303,7 @@ def obtener_productos_para_costoventa():
 
 # Datos para actualizar el historial de ganancias.
 def obtener_productos_para_acthistorial():
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('''SELECT id_producto, codigo, costo_producto, precio_venta FROM Productos''')
     productos_h = cursor.fetchall()
@@ -312,7 +313,7 @@ def obtener_productos_para_acthistorial():
 
 # Guardar en Historial_Ganancias
 def guardar_historial(id_producto, mes_año, ganancia, margen):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("""
             INSERT INTO Historial_Ganancias
@@ -326,7 +327,7 @@ def guardar_historial(id_producto, mes_año, ganancia, margen):
 
 
 def registrar_historial_costo(id_producto, costo_anterior, costo_nuevo, es_por_lote, unidades=None, motivo=None):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute(
         """
@@ -341,7 +342,7 @@ def registrar_historial_costo(id_producto, costo_anterior, costo_nuevo, es_por_l
 
 # Mostrar el historial de costos por producto.
 def mostrar_historial_costos_por_producto(codigo_producto):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute(
         """
@@ -361,7 +362,7 @@ def mostrar_historial_costos_por_producto(codigo_producto):
     
 # Mostrar el historial de costos de todos los productos..
 def mostrar_historial_costos_general():
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute(
             """
@@ -379,7 +380,7 @@ def mostrar_historial_costos_general():
 
 # Mostrar Historial de ganacias.
 def mostrar_historial_ganancias_producto(codigo_producto):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute(
             """
@@ -399,7 +400,7 @@ def mostrar_historial_ganancias_producto(codigo_producto):
 
 # Mostrar historial de ganancias mensual general.
 def mostrar_historial_general_mensual(mes_str):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute(
         """
@@ -420,7 +421,7 @@ def mostrar_historial_general_mensual(mes_str):
 
 # Obtener una lista de nombres de proveedores.
 def obtener_nombres_proveedores(texto):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('SELECT nombre FROM Proveedores WHERE nombre LIKE ?', (f'%{texto}%',))
     proveedores = [row[0] for row in cursor.fetchall()]
@@ -430,7 +431,7 @@ def obtener_nombres_proveedores(texto):
 
 # Obtener los datos para el módulo de búsqueda.
 def buscar_en_bd(tipo_busqueda, valor_busqueda):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
     if tipo_busqueda == "Todos los Materiales":
@@ -501,9 +502,22 @@ def buscar_en_bd(tipo_busqueda, valor_busqueda):
     conn.close()
     print(f"Resultados encontrados en la db: {resultados}")
     return resultados
+
+
+# Busaca las notas de entrega para mostrar en la busqueda.
+def encotrar_notas_entrega():
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("""SELECT ne.id_nota_entrega, ne.fecha, c.nombre, ne.total, ne.estado
+        FROM NotasEntrega ne
+        JOIN Clientes c ON ne.id_cliente = c.id_cliente""")
+    notas_entregas = cursor.fetchall()
+    conn.close()
+    return notas_entregas
+    
     
 def verificar_datos():
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     print("=== Facturas ===")
@@ -540,7 +554,7 @@ def verificar_datos():
     
     
 def agregar_campo_():
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Agregar el campo 'descripcion' a la tabla Productos
@@ -554,7 +568,7 @@ def agregar_campo_():
     
     
 def verificar_campo_en_bd():
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Verificar la estructura de la tabla Productos
@@ -567,7 +581,7 @@ def verificar_campo_en_bd():
     
 # Crear nuevo usuario.
 def insertar_usuario(usuario, clave, rol):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('INSERT INTO Usuarios (nombre_usuario, clave, rol) VALUES (?, ?, ?)', (usuario, clave, rol))
     conn.commit()
@@ -576,7 +590,7 @@ def insertar_usuario(usuario, clave, rol):
 
 # Validar entrada de un usuario.
 def validar_credenciales(usuario, contrasena):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('SELECT clave, rol FROM Usuarios WHERE nombre_usuario = ?', (usuario,))
     resultado = cursor.fetchone()
@@ -589,7 +603,7 @@ def validar_credenciales(usuario, contrasena):
 
 # Buscar usuarios en la base de datos.
 def buscar_usuarios(texto_busqueda):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('''
         SELECT id_usuario, nombre_usuario, rol
@@ -603,7 +617,7 @@ def buscar_usuarios(texto_busqueda):
 
 # Actualizar datos de Usuarios.
 def actualizar_usuario(id_usuario, nombre_usuario, rol, contrasena=None):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     if contrasena:
@@ -625,7 +639,7 @@ def actualizar_usuario(id_usuario, nombre_usuario, rol, contrasena=None):
 
 # Obtener los usuarios del sistema.
 def obtener_nombres_usuarios():
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('SELECT nombre_usuario FROM Usuarios')
     resultados = cursor.fetchall()
@@ -635,7 +649,7 @@ def obtener_nombres_usuarios():
 
 # Eliminar a usuarios de la base de datos por nombre.
 def eliminar_usuario_bd_nombre(nombre_usuario):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('DELETE FROM Usuarios WHERE nombre_usuario = ?', (nombre_usuario,))
     conn.commit()
@@ -644,7 +658,7 @@ def eliminar_usuario_bd_nombre(nombre_usuario):
 
 # Eliminar a usuarios de la base de datos por ID.
 def eliminar_usuario_bd(id_usuario):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('DELETE FROM Usuarios WHERE id_usuario = ?', (id_usuario,))
     conn.commit()
@@ -653,7 +667,7 @@ def eliminar_usuario_bd(id_usuario):
 
 # Calcular el costo de un producto.
 def calcular_costo_produccion(id_producto):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Obtener materiales usados en el producto
@@ -673,7 +687,7 @@ def calcular_costo_produccion(id_producto):
 
 
 def actualizar_costo_producto(nuevo_costo, id_producto): # Acualizar aqui los datos
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute(
             "UPDATE Productos SET costo_producto = ? WHERE id_producto = ?",
@@ -684,7 +698,7 @@ def actualizar_costo_producto(nuevo_costo, id_producto): # Acualizar aqui los da
 
 # Actualizar los costos de producción.
 def datos_costo_d_producto_actualizar(codigo_producto):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT id_producto, costo_producto, precio_venta FROM Productos WHERE codigo = ?",
             (codigo_producto,))
@@ -697,7 +711,7 @@ def datos_costo_d_producto_actualizar(codigo_producto):
 
 # Actualizar el precio_venta en la base de datos
 def actualizar_precio_venta(precio, id_producto):
-        conn = sqlite3.connect('ikigai_inventario.db')
+        conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         cursor.execute(
             "UPDATE Productos SET precio_venta = ? WHERE id_producto = ?",
@@ -709,7 +723,7 @@ def actualizar_precio_venta(precio, id_producto):
 
 # Modulo de simulacion de precios.
 def simular_escenario(id_producto, nuevo_precio=None, nuevo_costo=None, nuevo_margen=None):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Obtener datos actuales
@@ -733,22 +747,74 @@ def simular_escenario(id_producto, nuevo_precio=None, nuevo_costo=None, nuevo_ma
         "ganancia_simulada": ganancia_simulada,
         "margen_simulado": margen_simulado
     }
-    
-    
+
+
+def incrementar_stock_producto(id_producto, cantidad):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    try:
+        # Verificar que el producto exista
+        cursor.execute("SELECT cantidad FROM Productos WHERE id_producto = ?", (id_producto,))
+        resultado = cursor.fetchone()
+
+        if not resultado:
+            messagebox.showerror("Error", "Producto no encontrado en la base de datos.")
+            return False
+
+        stock_actual = resultado[0]
+        nuevo_stock = stock_actual + cantidad
+
+        # Actualizar el stock en la base de datos
+        cursor.execute("UPDATE Productos SET cantidad = ? WHERE id_producto = ?", (nuevo_stock, id_producto))
+        conn.commit()
+        messagebox.showinfo("Éxito", f"Stock del producto actualizado. Nuevo stock: {nuevo_stock}")
+        return True
+
+    except Exception as e:
+        messagebox.showerror("Error", f"No se pudo actualizar el stock: {e}")
+        conn.rollback()
+        return False
+
+    finally:
+        conn.close()
+
+
 # Verificar cantidad de producto para la venta.
 def verificar_stock_suficiente(id_producto, cantidad_solicitada):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT cantidad FROM Productos WHERE id_producto = ?", (id_producto,))
-    stock_actual = cursor.fetchone()[0]
-    conn.commit()
+    resultado = cursor.fetchone()
     conn.close()
-    return stock_actual >= cantidad_solicitada
+
+    if not resultado:
+        return False, 0, "Producto no encontrado en la base de datos."
+
+    stock_actual = resultado[0]
+
+    if stock_actual <= 0:
+        return False, stock_actual, "No hay stock disponible para este producto."
+    elif stock_actual < cantidad_solicitada:
+        return False, stock_actual, f"No hay suficiente stock. Stock disponible: {stock_actual}"
+    else:
+        return True, stock_actual, "Stock suficiente."
+
+
+# Verificar cantidad de producto para la venta.
+# def verificar_stock_suficiente(id_producto, cantidad_solicitada):
+#     conn = sqlite3.connect(db_path)
+#     cursor = conn.cursor()
+#     cursor.execute("SELECT cantidad FROM Productos WHERE id_producto = ?", (id_producto,))
+#     stock_actual = cursor.fetchone()[0]
+#     conn.commit()
+#     conn.close()
+#     return stock_actual >= cantidad_solicitada
 
 
 # Restar la venta de un producto en la base de datos.
 def actualizar_stock_después_venta(id_producto, cantidad_vendida):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Restar la cantidad vendida del stock actual
@@ -913,7 +979,7 @@ def datos_imprimir_historial_ganancia():
 
 # Eliminar Proveedores de la base de datos
 def eliminar_proveedor_bd(nombre_proveedor):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('DELETE FROM Proveedores WHERE nombre = ?', (nombre_proveedor,))
     conn.commit()
@@ -921,7 +987,7 @@ def eliminar_proveedor_bd(nombre_proveedor):
     
 # Eliminar materiales de la base de datos
 def eliminar_material_bd(nombre_material):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('DELETE FROM Materiales WHERE nombre = ?', (nombre_material,))
     conn.commit()
@@ -930,7 +996,7 @@ def eliminar_material_bd(nombre_material):
     
 # Eliminar Productos.
 def eliminar_producto_bd(codigo_producto):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('DELETE FROM Productos WHERE codigo = ?', (codigo_producto,))
     conn.commit()
@@ -938,7 +1004,7 @@ def eliminar_producto_bd(codigo_producto):
     
 # Obtener los lotes 
 def obtener_lotes():
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT id_lote, fecha_creacion, descripcion, cantidad_unidades FROM Lotes")
     lotes = cursor.fetchall()
@@ -947,7 +1013,7 @@ def obtener_lotes():
 
 # Registrar el nuevo lote
 def registrar_producto_en_lote(id_lote, id_producto, unidades_lote):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute(
         "INSERT INTO Lote_Productos (id_lote, id_producto, cantidad_asignada) VALUES (?, ?, ?)",
@@ -958,7 +1024,7 @@ def registrar_producto_en_lote(id_lote, id_producto, unidades_lote):
     
 # Obtener lotes y sus productos.
 def obtener_lotes_con_productos():
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("""
         SELECT
@@ -977,7 +1043,7 @@ def obtener_lotes_con_productos():
 
 
 def obtener_costo_actual_lote(id_lote):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT costo_lote FROM Lotes WHERE id_lote = ?", (id_lote,))
     costo_actual = cursor.fetchone()
@@ -986,7 +1052,7 @@ def obtener_costo_actual_lote(id_lote):
 
 
 def guardar_info_tienda(tienda, direccion, id_fiscal, telefono, correo):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("INSERT INTO Tienda (nombre, direccion, identificacion_fiscal, telefono, email) VALUES (?, ?, ?, ?, ?)",
                    (tienda, direccion, id_fiscal, telefono, correo))
@@ -995,7 +1061,7 @@ def guardar_info_tienda(tienda, direccion, id_fiscal, telefono, correo):
     
 
 def datos_registrados_tienda():
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT id_tienda, direccion, telefono, email FROM Tienda WHERE id_tienda = 1")
     datos_tienda = cursor.fetchall()
@@ -1005,15 +1071,339 @@ def datos_registrados_tienda():
 
 
 def actualizar_datos_tienda(direccion, telefono, correo, id_tienda):
-    conn = sqlite3.connect('ikigai_inventario.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("""UPDATE Tienda SET direccion = ?, telefono = ?,email = ? WHERE id_tienda = ?""", (direccion, telefono, correo, id_tienda ))
     conn.commit()
     conn.close()    
 
 
-def limpiar_base_datos():
+def obtener_estado_nota_entrega(id_nota_entrega):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT estado FROM NotasEntrega WHERE id_nota_entrega = ?", (id_nota_entrega,))
+    estado = cursor.fetchone()[0] if cursor.fetchone() else None
+    conn.close()
+    return estado
+
+def obtener_datos_nota_entrega(id_nota_entrega):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id_cliente, fecha, subtotal, descuento, impuesto, total
+        FROM NotasEntrega
+        WHERE id_nota_entrega = ?
+    """, (id_nota_entrega,))
+    nota_data = cursor.fetchone()
+    conn.close()
+    return nota_data
+
+def obtener_ultimo_numero_factura():
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT ultimo_numero_factura FROM Configuracion WHERE id_configuracion = 1")
+    ultimo_numero = cursor.fetchone()[0]
+    conn.close()
+    return ultimo_numero
+
+def actualizar_ultimo_numero_factura(nuevo_numero):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE Configuracion SET ultimo_numero_factura = ? WHERE id_configuracion = 1", (nuevo_numero,))
+    conn.commit()
+    conn.close()
+
+def insertar_factura_venta(id_venta, id_cliente, fecha, subtotal, descuento, impuesto, total):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO Ventas (id_venta, id_cliente, fecha, tipo_documento, subtotal, descuento, impuesto, total)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (id_venta, id_cliente, fecha, "Factura", subtotal, descuento, impuesto, total))
+    conn.commit()
+    conn.close()
+
+def obtener_detalles_nota_entrega(id_nota_entrega):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT id_producto, cantidad, precio_unitario, subtotal FROM DetalleNotaEntrega WHERE id_nota_entrega = ?", (id_nota_entrega,))
+    detalles = cursor.fetchall()
+    conn.close()
+    return detalles
+
+def insertar_detalle_factura(id_venta, id_producto, cantidad, precio_unitario, subtotal_detalle):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO Detalle_Venta (id_venta, id_producto, cantidad, precio_unitario, subtotal)
+        VALUES (?, ?, ?, ?, ?)
+    """, (id_venta, id_producto, cantidad, precio_unitario, subtotal_detalle))
+    conn.commit()
+    conn.close()
+
+def actualizar_estado_nota_entrega(id_nota_entrega, estado):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE NotasEntrega
+        SET estado = ?
+        WHERE id_nota_entrega = ?
+    """, (estado, id_nota_entrega))
+    conn.commit()
+    conn.close()
+    
+
+# Datos de la Venta.
+def datos_de_la_venta(id_venta):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("""
+            SELECT
+                v.id_venta,
+                v.fecha,
+                c.nombre,
+                c.direccion,
+                c.identificacion_fiscal,
+                v.total,
+                v.tipo_documento,
+                t.nombre AS tienda_nombre,
+                t.direccion AS tienda_direccion,
+                t.identificacion_fiscal AS tienda_identificacion_fiscal,
+                v.descuento,
+                v.subtotal,
+                v.impuesto
+            FROM
+                Ventas v
+            JOIN
+                Clientes c ON v.id_cliente = c.id_cliente
+            CROSS JOIN
+                Tienda t
+            WHERE
+                v.id_venta = ?
+        """, (id_venta,))
+
+    venta_data = cursor.fetchone()
+    conn.close()
+    return venta_data
+
+
+# Detalles de la venta
+def detalle_de_la_venta(id_venta):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT p.codigo, dv.cantidad, dv.precio_unitario, dv.subtotal
+        FROM Detalle_Venta dv
+        JOIN Productos p ON dv.id_producto = p.id_producto
+        WHERE dv.id_venta = ?
+    """, (id_venta,))
+    detalles = cursor.fetchall()
+    conn.close()
+    return detalles
+
+
+# Datos de la nota de entrega.
+def datos_nota_entrega(id_nota_entrega):
     conn = sqlite3.connect("ikigai_inventario.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT
+            ne.id_nota_entrega,
+            ne.fecha,
+            c.nombre,
+            c.direccion,
+            c.identificacion_fiscal,
+            ne.total,
+            ne.subtotal,
+            ne.descuento,
+            ne.impuesto,
+            t.nombre AS tienda_nombre,
+            t.direccion AS tienda_direccion,
+            t.identificacion_fiscal AS tienda_identificacion_fiscal
+        FROM
+            NotasEntrega ne
+        JOIN
+            Clientes c ON ne.id_cliente = c.id_cliente
+        CROSS JOIN
+            Tienda t
+        WHERE
+            ne.id_nota_entrega = ?
+    """, (id_nota_entrega,))
+    nota_data = cursor.fetchone()
+    conn.close()
+    return nota_data
+
+
+# Detalles de la nota de entrega.
+def detalle_nota_entrega(id_nota_entrega):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT p.codigo, dne.cantidad, dne.precio_unitario, dne.subtotal
+        FROM DetalleNotaEntrega dne
+        JOIN Productos p ON dne.id_producto = p.id_producto
+        WHERE dne.id_nota_entrega = ?
+    """, (id_nota_entrega,))
+
+    detalles = cursor.fetchall()
+    conn.close()
+    return detalles
+
+# insertar lote en la base de datos
+def insertar_lote(descripcion, unidades, costo_lote):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO Lotes (fecha_creacion, descripcion, cantidad_unidades, costo_lote) VALUES (?, ?, ?, ?)",
+        (datetime.now().strftime("%Y-%m-%d"), descripcion, unidades, costo_lote)
+    )
+    id_lote = cursor.lastrowid  # Obtener el ID del lote recién creado
+    conn.commit()
+    conn.close()
+    return id_lote
+
+
+# Insertar en la tabla lote_productos
+def insertar_lote_productos(id_lote, id_producto, cantidad):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO Lote_Productos (id_lote, id_producto, cantidad_asignada) VALUES (?, ?, ?)",
+        (id_lote, id_producto, cantidad)
+    )
+    conn.commit()
+    conn.close()
+    
+
+# Actualizar el costo del lote.
+def actualizar_costo_lote(nuevo_costo, id_lote):
+    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect('ikigai_inventario.db')
+    cursor = conn.cursor()
+    cursor.execute("UPDATE Lotes SET costo_lote = ? WHERE id_lote = ?", (nuevo_costo, id_lote))
+    conn.commit()
+    conn.close()
+
+
+# Obtener el costo anterior del lote
+def costo_anterior_lote(id_lote):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT costo_lote FROM Lotes WHERE id_lote = ?", (id_lote,))
+    anterior_costo = cursor.fetchone()[0]
+    conn.close()
+    return anterior_costo
+
+
+# Actualizar el precio de venta del lote en la base de datos
+def actualiza_precio_venta_lote(nuevo_precio, id_lote):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE Lotes SET precio_venta_lote = ? WHERE id_lote = ?", (nuevo_precio, id_lote))
+    conn.commit()
+    conn.close()
+
+
+# Obtener el ultimo número de factura y crear el siguiente úmero de factura.
+def siguiente_numero_factura():
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT ultimo_numero_factura FROM Configuracion WHERE id_configuracion = 1")
+    ultimo_numero = cursor.fetchone()[0]
+    nuevo_numero = ultimo_numero + 1
+    cursor.execute("UPDATE Configuracion SET ultimo_numero_factura = ? WHERE id_configuracion = 1", (nuevo_numero,))
+    id_venta = nuevo_numero
+    conn.commit()
+    conn.close()
+    return id_venta
+
+
+# Obtener los umbrales configurados.
+def obtener_umbrales_alertas():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT tipo, id_item, umbral FROM UmbralesAlerta")
+    umbrales = cursor.fetchall()
+    conn.close()
+    return umbrales
+
+
+#  Crear advetencias de stock para materiles y productos
+def cargar_items(tipo):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    if tipo == 'material':
+        cursor.execute("SELECT id_material, nombre FROM Materiales")
+    elif tipo == 'producto':
+        cursor.execute("SELECT id_producto, codigo FROM Productos")
+    items = cursor.fetchall()
+    conn.close()
+    return items
+
+
+# Configurar el umbral para las alertas.
+def configurar_umbral_alerta(tipo, id_item, umbral):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    # Verificar si ya existe un umbral para este item
+    cursor.execute("SELECT id_umbral FROM UmbralesAlerta WHERE tipo = ? AND id_item = ?", (tipo, id_item))
+    umbral_existente = cursor.fetchone()
+
+    if umbral_existente:
+        # Actualizar el umbral existente
+        cursor.execute("UPDATE UmbralesAlerta SET umbral = ? WHERE id_umbral = ?", (umbral, umbral_existente[0]))
+    else:
+        # Insertar un nuevo umbral
+        cursor.execute("INSERT INTO UmbralesAlerta (tipo, id_item, umbral) VALUES (?, ?, ?)", (tipo, id_item, umbral))
+
+    conn.commit()
+    conn.close()
+
+
+def verificar_stock_bajo():
+    umbrales = obtener_umbrales_alertas()
+    alertas = []
+
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    for tipo, id_item, umbral in umbrales:
+        if tipo == 'material':
+            cursor.execute("SELECT nombre, tipo, tamaño, color, stock FROM Materiales WHERE id_material = ?", (id_item,))
+        elif tipo == 'producto':
+            cursor.execute("SELECT codigo, tipo, cantidad FROM Productos WHERE id_producto = ?", (id_item,))
+
+        item = cursor.fetchone()
+        if item:
+            cantidad_actual = item[-1]  # La cantidad es el último elemento de la tupla
+            if cantidad_actual <= umbral:
+                if tipo == 'material':
+                    nombre, tipo_material, tamaño, color, cantidad = item
+                    alertas.append({
+                        'tipo': tipo,
+                        'nombre': nombre,
+                        'tipo_material': tipo_material,
+                        'tamaño': tamaño,
+                        'color': color,
+                        'cantidad': cantidad
+                    })
+                elif tipo == 'producto':
+                    codigo, tipo_producto, cantidad = item
+                    alertas.append({
+                        'tipo': tipo,
+                        'codigo': codigo,
+                        'tipo_producto': tipo_producto,
+                        'cantidad': cantidad
+                    })
+
+    conn.close()
+    return alertas
+
+    
+# Borrado total de la base de datos
+def limpiar_base_datos():
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Desactivar las restricciones de claves foráneas
@@ -1030,6 +1420,8 @@ def limpiar_base_datos():
     cursor.execute("DELETE FROM Detalle_Producto;")
     cursor.execute("DELETE FROM Historial_Costos;")
     cursor.execute("DELETE FROM Historial_Ganancias;")
+    cursor.execute("DELETE FROM Materiales;")
+    cursor.execute("DELETE FROM Proveedores;")
     # Añade aquí más tablas según sea necesario
 
     # Volver a activar las restricciones de claves foráneas

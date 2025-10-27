@@ -2,17 +2,53 @@
 
 import tkinter as tk
 from tkinter import ttk, messagebox
-import sqlite3
-from db import cargador_clientes, cargador_productos, validar_stock_del_producto, detalle_producto_venta, guarda_venta_bd, agregar_detalle_factura, actualizar_stock_producto_venta, nuevo_cliente
-from db import guardar_nota_entrega, agregar_detalle_nota_entrega
+import sqlite3  
+from db import (
+    guardar_nota_entrega, 
+    agregar_detalle_nota_entrega,
+    cargador_clientes, 
+    cargador_productos, 
+    validar_stock_del_producto, 
+    detalle_producto_venta, 
+    guarda_venta_bd, agregar_detalle_factura, 
+    actualizar_stock_producto_venta, 
+    nuevo_cliente,
+    obtener_estado_nota_entrega,
+    obtener_datos_nota_entrega,
+    obtener_ultimo_numero_factura,
+    actualizar_ultimo_numero_factura,
+    insertar_factura_venta,
+    obtener_detalles_nota_entrega,
+    insertar_detalle_factura,
+    actualizar_estado_nota_entrega,
+    detalle_de_la_venta,
+    datos_de_la_venta,
+    datos_nota_entrega,
+    detalle_nota_entrega,
+    siguiente_numero_factura,
+    verificar_stock_suficiente
+)
 from datetime import datetime
+from PIL import Image, ImageTk
+from recursos import LOGO_PATH
 
 
 class VentanaVentas:
     def __init__(self, root, usuario_actual, volver_menu, mostra_pantalla=True):
         self.root = root
         self.usuario_actual = usuario_actual  # ID del usuario logueado
+        self.logo_path = LOGO_PATH  # Imagen del Logo
+        
+        # Cargar logo para redimencionar a 50px
+        try:
+            self.imagen_panel = Image.open(self.logo_path)
+            self.imagen_panel_resize = self.imagen_panel.resize((60, 60), Image.LANCZOS)
+            self.imagen_panel_tk = ImageTk.PhotoImage(self.imagen_panel_resize)
+        except Exception as e:
+            print(f"Error al cargar la imagen: {e}")
+            self.imagen_panel_tk = tk.Label(self.root, text="Ikigai Designs", font=("Arial", 24), bg="#f0f0f0").pack(pady=20)
 
+        
         for widget in self.root.winfo_children():
             widget.destroy()
         
@@ -21,6 +57,9 @@ class VentanaVentas:
         frame_menu.pack(side=tk.LEFT, fill=tk.Y)
         frame_menu.pack_propagate(False)
         
+        frame_imagen_panel = tk.Frame(frame_menu, bg="#2C3E50", height=70)
+        frame_imagen_panel.pack(side=tk.BOTTOM, fill=tk.X, pady=10)
+        
         tk.Button(
         frame_menu,
         text="Volver al Menú",
@@ -28,6 +67,14 @@ class VentanaVentas:
         width=18,
         bg="#913131"
         ).pack(side=tk.LEFT, padx=30, pady=40)
+        
+        # Imagen del Logo para el panel izquierdo
+        if self.imagen_panel_tk:
+            label_imagen = tk.Label(frame_imagen_panel, image=self.imagen_panel_tk, bg="#2C3E50")
+            label_imagen.pack(side=tk.LEFT, padx=70)
+        else:
+            label_texto = tk.Label(frame_imagen_panel, text="Ikigai", font=("Arial", 10), bg="#2C3E50")
+            label_texto.pack(side=tk.LEFT, padx=30)
         
         self.id_venta_actual = None
         
@@ -258,18 +305,14 @@ class VentanaVentas:
         
     # Validar que se haya seleccionado un producto y un cliente
     def agregar_producto_a_venta(self):
-         # Validar cliente
+     # Validar cliente
         if not self.combobox_clientes.get():
             messagebox.showerror("Error", "Debe seleccionar un cliente de la lista.")
             return
+
         # Validar que se haya seleccionado un producto
         if not hasattr(self, 'producto_seleccionado') or not self.producto_seleccionado:
             messagebox.showerror("Error", "Debe seleccionar un producto de la lista.")
-            return
-
-        # Validar que se haya seleccionado un cliente
-        if not self.combobox_clientes.get():
-            messagebox.showerror("Error", "Debe seleccionar un cliente.")
             return
 
         # Extraer el ID del producto desde el texto seleccionado
@@ -280,9 +323,16 @@ class VentanaVentas:
             messagebox.showerror("Error", "Seleccione un producto válido de la lista.")
             return
 
+        # Validar stock del producto
+        stock_suficiente, stock_actual, mensaje = verificar_stock_suficiente(id_producto, self.cantidad.get())
+
+        if not stock_suficiente:
+            messagebox.showerror("Error", mensaje)
+            return
+
         # Obtener detalles del producto
         codigo, precio_unitario = detalle_producto_venta(id_producto)
-        
+
         self.iva_incluido = tk.BooleanVar(value=True)  # Por defecto: sí incluye IVA
         self.check_iva = tk.Checkbutton(
             self.frame_productos,
@@ -290,7 +340,6 @@ class VentanaVentas:
             variable=self.iva_incluido
         )
         self.check_iva.grid(row=1, column=0, columnspan=2, sticky="w", padx=5)
-        
 
         # Calcular subtotal
         # Obtener el descuento
@@ -303,12 +352,11 @@ class VentanaVentas:
         # Agregar a la lista temporal y al Treeview
         self.lista_productos_venta.append({
             "id_producto": id_producto,
-            "codigo": codigo, # El articulo queda vacio si no hay nombre.
+            "codigo": codigo,
             "cantidad": self.cantidad.get(),
             "precio_unitario": precio_unitario,
             "subtotal": subtotal
         })
-
         self.tree_resumen.insert("", "end", values=(codigo, self.cantidad.get(), f"€ {precio_unitario:.2f}", f"€ {subtotal:.2f}"))
 
         # Actualizar total
@@ -322,83 +370,175 @@ class VentanaVentas:
              
     # Generar Factura
     def generar_venta(self):
+        # Validar que se hayan agregado productos a la venta
         if not self.lista_productos_venta:
             messagebox.showerror("Error", "Debe agregar al menos un producto a la venta.")
             return
 
+        # Validar que se haya seleccionado un cliente válido
+        if not hasattr(self, 'combobox_clientes') or not self.combobox_clientes.get():
+            messagebox.showerror("Error", "Debe seleccionar un cliente.")
+            return
+
+        # Validar que el cliente seleccionado no sea "0" o un valor inválido
+        cliente_seleccionado = self.combobox_clientes.get()
+        if cliente_seleccionado.startswith("0 - "):
+            messagebox.showerror("Error", "Debe seleccionar un cliente válido.")
+            return
+
+        try:
+            id_cliente = int(cliente_seleccionado.split(" - ")[0])
+            if id_cliente <= 0:
+                messagebox.showerror("Error", "Debe seleccionar un cliente válido.")
+                return
+        except (ValueError, IndexError):
+            messagebox.showerror("Error", "Debe seleccionar un cliente válido.")
+            return
+
+        # Validar que todos los productos tengan stock suficiente
+        for item in self.lista_productos_venta:
+            id_producto = item["id_producto"]
+            cantidad_solicitada = item["cantidad"]
+
+            stock_suficiente, stock_actual, mensaje = verificar_stock_suficiente(id_producto, cantidad_solicitada)
+            if not stock_suficiente:
+                messagebox.showerror("Error", mensaje)
+                return
+
+        # Confirmar generación de factura
         confirmar = messagebox.askyesno("Confirmar", "¿Está seguro de generar esta factura?")
         if not confirmar:
             return
 
-        # Obtener el ID del cliente
-        id_cliente = int(self.combobox_clientes.get().split(" - ")[0])
+        try:
+            # Obtener el ID del cliente
+            id_cliente = int(self.combobox_clientes.get().split(" - ")[0])
 
-        # Calcular el subtotal, descuento, impuesto y total
-        subtotal = sum(item["subtotal"] for item in self.lista_productos_venta)
-        descuento = float(self.entry_descuento.get() or 0)
-        impuesto = subtotal * 0.19  # IVA del 19%
-        total = subtotal - descuento + impuesto
+            # Calcular el subtotal, descuento, impuesto y total
+            subtotal = sum(item["subtotal"] for item in self.lista_productos_venta)
+            descuento = float(self.entry_descuento.get() or 0)
+            impuesto = subtotal * 0.19  # IVA del 19%
+            total = subtotal - descuento + impuesto
 
-        # Conectar a la base de datos
-        conn = sqlite3.connect("ikigai_inventario.db")
-        cursor = conn.cursor()
+            # Conectar a la base de datos para obtener el siguiente número de factura
+            id_venta = siguiente_numero_factura()
 
-        # Obtener el siguiente número de factura
-        cursor.execute("SELECT ultimo_numero_factura FROM Configuracion WHERE id_configuracion = 1")
-        ultimo_numero = cursor.fetchone()[0]
-        nuevo_numero = ultimo_numero + 1
-        cursor.execute("UPDATE Configuracion SET ultimo_numero_factura = ? WHERE id_configuracion = 1", (nuevo_numero,))
-        id_venta = nuevo_numero
+            # Guardar la factura en la base de datos
+            factura = guarda_venta_bd(
+                id_venta,
+                id_cliente,
+                datetime.now().strftime("%Y-%m-%d"),
+                "factura",
+                round(subtotal, 2),
+                descuento,
+                round(impuesto, 2),
+                round(total, 2)
+            )
 
-        conn.commit()
-        conn.close()
+            # Guardar los detalles de la factura y actualizar el stock
+            for item in self.lista_productos_venta:
+                agregar_detalle_factura(
+                    id_venta,
+                    item["id_producto"],
+                    item["cantidad"],
+                    item["precio_unitario"],
+                    item["subtotal"]
+                )
+                actualizar_stock_producto_venta(item["cantidad"], item["id_producto"])
 
-        # Guardar la factura en la base de datos
-        factura = guarda_venta_bd(id_venta, id_cliente, datetime.now().strftime("%Y-%m-%d"), "factura", round(subtotal, 2), descuento, round(impuesto, 2), round(total, 2))
+            # Mostrar el botón de imprimir
+            self.id_venta_actual = id_venta
+            self.boton_imprimir.config(text="Imprimir Factura", command=lambda: imprimir_factura(self.id_venta_actual))
+            self.boton_imprimir.pack(side="left", padx=5, pady=5)
 
-        # Guardar los detalles de la factura
-        for item in self.lista_productos_venta:
-            # Guarda los datos en la base de datos
-            agregar_detalle_factura(id_venta, item["id_producto"], item["cantidad"], item["precio_unitario"], item["subtotal"])
-            actualizar_stock_producto_venta(item["cantidad"], item["id_producto"])
+            messagebox.showinfo("Éxito", "Factura generada correctamente.")
 
-        # Mostrar el botón de imprimir
-        self.id_venta_actual = id_venta
-        self.boton_imprimir.config(text="Imprimir Factura", command=lambda: imprimir_factura(self.id_venta_actual))
-        self.boton_imprimir.pack(side="left", padx=5, pady=5)
-        
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo generar la factura: {e}")      
 
     # Generar nosta de entrega
     def generar_nota_entrega(self):
+        # Validar que se hayan agregado productos a la nota de entrega
         if not self.lista_productos_venta:
             messagebox.showerror("Error", "Debe agregar al menos un producto a la nota de entrega.")
             return
 
+        # Validar que se haya seleccionado un cliente válido
+        if not hasattr(self, 'combobox_clientes') or not self.combobox_clientes.get():
+            messagebox.showerror("Error", "Debe seleccionar un cliente.")
+            return
+
+        # Validar que el cliente seleccionado no sea "0" o un valor inválido
+        cliente_seleccionado = self.combobox_clientes.get()
+        if cliente_seleccionado.startswith("0 - "):
+            messagebox.showerror("Error", "Debe seleccionar un cliente válido.")
+            return
+
+        try:
+            id_cliente = int(cliente_seleccionado.split(" - ")[0])
+            if id_cliente <= 0:
+                messagebox.showerror("Error", "Debe seleccionar un cliente válido.")
+                return
+        except (ValueError, IndexError):
+            messagebox.showerror("Error", "Debe seleccionar un cliente válido.")
+            return
+
+        # Validar que todos los productos tengan stock suficiente
+        for item in self.lista_productos_venta:
+            id_producto = item["id_producto"]
+            cantidad_solicitada = item["cantidad"]
+
+            stock_suficiente, stock_actual, mensaje = verificar_stock_suficiente(id_producto, cantidad_solicitada)
+            if not stock_suficiente:
+                messagebox.showerror("Error", mensaje)
+                return
+
+        # Confirmar generación de nota de entrega
         confirmar = messagebox.askyesno("Confirmar", "¿Está seguro de generar esta nota de entrega?")
         if not confirmar:
             return
 
-        # Obtener el ID del cliente
-        id_cliente = int(self.combobox_clientes.get().split(" - ")[0])
 
-        # Calcular el subtotal, descuento, impuesto y total
-        subtotal = sum(item["subtotal"] for item in self.lista_productos_venta)
-        descuento = float(self.entry_descuento.get() or 0)
-        impuesto = subtotal * 0.19  # IVA del 19%
-        total = subtotal - descuento + impuesto
+        try:
+            # Obtener el ID del cliente
+            id_cliente = int(self.combobox_clientes.get().split(" - ")[0])
 
-        # Guardar la nota de entrega en la base de datos
-        nota_entrega = guardar_nota_entrega(id_cliente, datetime.now().strftime("%Y-%m-%d"), round(subtotal, 2), descuento, round(impuesto, 2), round(total, 2))
+            # Calcular el subtotal, descuento, impuesto y total
+            subtotal = sum(item["subtotal"] for item in self.lista_productos_venta)
+            descuento = float(self.entry_descuento.get() or 0)
+            impuesto = subtotal * 0.19  # IVA del 19%
+            total = subtotal - descuento + impuesto
 
-        # Guardar los detalles de la nota de entrega
-        for item in self.lista_productos_venta:
-            agregar_detalle_nota_entrega(nota_entrega, item["id_producto"], item["cantidad"], item["precio_unitario"], item["subtotal"])
+            # Guardar la nota de entrega en la base de datos
+            id_nota_entrega = guardar_nota_entrega(
+                id_cliente,
+                datetime.now().strftime("%Y-%m-%d"),
+                round(subtotal, 2),
+                descuento,
+                round(impuesto, 2),
+                round(total, 2)
+            )
 
-        # Mostrar el botón de imprimir
-        self.id_nota_entrega_actual = nota_entrega
-        self.boton_imprimir.config(text="Imprimir Nota", command=lambda: imprimir_nota_entrega(self.id_nota_entrega_actual))
-        self.boton_imprimir.pack(side="left", padx=5, pady=5)
-        messagebox.showinfo("Éxito", f"Nota de entrega generada con éxito. ID: {nota_entrega}")
+            # Guardar los detalles de la nota de entrega y actualizar el stock
+            for item in self.lista_productos_venta:
+                agregar_detalle_nota_entrega(
+                    id_nota_entrega,
+                    item["id_producto"],
+                    item["cantidad"],
+                    item["precio_unitario"],
+                    item["subtotal"]
+                )
+                actualizar_stock_producto_venta(item["cantidad"], item["id_producto"])
+
+            # Mostrar el botón de imprimir
+            self.id_nota_entrega_actual = id_nota_entrega
+            self.boton_imprimir.config(text="Imprimir Nota", command=lambda: imprimir_nota_entrega(self.id_nota_entrega_actual))
+            self.boton_imprimir.pack(side="left", padx=5, pady=5)
+
+            messagebox.showinfo("Éxito", f"Nota de entrega generada con éxito. ID: {id_nota_entrega}")
+
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo generar la nota de entrega: {e}")
    
     
     def limpiar_pantalla(self):
@@ -482,25 +622,14 @@ def convertir_nota_a_factura(id_nota_entrega):
         return
 
     try:
-        conn = sqlite3.connect("ikigai_inventario.db")
-        cursor = conn.cursor()
-
         # Verificar si la nota de entrega ya está facturada
-        cursor.execute("SELECT estado FROM NotasEntrega WHERE id_nota_entrega = ?", (id_nota_entrega,))
-        estado = cursor.fetchone()[0]
-
+        estado = obtener_estado_nota_entrega(id_nota_entrega)
         if estado == "Facturado":
             messagebox.showerror("Error", "Esta nota de entrega ya ha sido facturada.")
             return
 
         # Obtener los datos de la nota de entrega
-        cursor.execute("""
-            SELECT id_cliente, fecha, subtotal, descuento, impuesto, total
-            FROM NotasEntrega
-            WHERE id_nota_entrega = ?
-        """, (id_nota_entrega,))
-
-        nota_data = cursor.fetchone()
+        nota_data = obtener_datos_nota_entrega(id_nota_entrega)
         if not nota_data:
             messagebox.showerror("Error", "No se encontró la nota de entrega.")
             return
@@ -508,38 +637,23 @@ def convertir_nota_a_factura(id_nota_entrega):
         id_cliente, fecha, subtotal, descuento, impuesto, total = nota_data
 
         # Obtener el siguiente número de factura
-        cursor.execute("SELECT ultimo_numero_factura FROM Configuracion WHERE id_configuracion = 1")
-        ultimo_numero = cursor.fetchone()[0]
+        ultimo_numero = obtener_ultimo_numero_factura()
         nuevo_numero = ultimo_numero + 1
-        cursor.execute("UPDATE Configuracion SET ultimo_numero_factura = ? WHERE id_configuracion = 1", (nuevo_numero,))
+        actualizar_ultimo_numero_factura(nuevo_numero)
 
         # Guardar la factura en la base de datos
-        cursor.execute("""
-            INSERT INTO Ventas (id_venta, id_cliente, fecha, tipo_documento, subtotal, descuento, impuesto, total)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (nuevo_numero, id_cliente, fecha, "Factura", subtotal, descuento, impuesto, total))
-
+        insertar_factura_venta(nuevo_numero, id_cliente, fecha, subtotal, descuento, impuesto, total)
         id_venta = nuevo_numero
 
         # Copiar los detalles de la nota de entrega a la factura
-        cursor.execute("SELECT id_producto, cantidad, precio_unitario, subtotal FROM DetalleNotaEntrega WHERE id_nota_entrega = ?", (id_nota_entrega,))
-        detalles = cursor.fetchall()
-
+        detalles = obtener_detalles_nota_entrega(id_nota_entrega)
         for detalle in detalles:
             id_producto, cantidad, precio_unitario, subtotal_detalle = detalle
-            cursor.execute("""
-                INSERT INTO Detalle_Venta (id_venta, id_producto, cantidad, precio_unitario, subtotal)
-                VALUES (?, ?, ?, ?, ?)
-            """, (id_venta, id_producto, cantidad, precio_unitario, subtotal_detalle))
+            insertar_detalle_factura(id_venta, id_producto, cantidad, precio_unitario, subtotal_detalle)
 
         # Actualizar el estado de la nota de entrega a 'Facturado'
-        cursor.execute("""
-            UPDATE NotasEntrega
-            SET estado = 'Facturado'
-            WHERE id_nota_entrega = ?
-        """, (id_nota_entrega,))
+        actualizar_estado_nota_entrega(id_nota_entrega, "Facturado")
 
-        conn.commit()
         messagebox.showinfo("Éxito", f"Nota de entrega #{id_nota_entrega} convertida en factura #{id_venta}.")
 
         # Preguntar si desea imprimir la nueva factura
@@ -549,8 +663,6 @@ def convertir_nota_a_factura(id_nota_entrega):
 
     except Exception as e:
         messagebox.showerror("Error", f"No se pudo convertir la nota de entrega en factura: {e}")
-    finally:
-        conn.close()
 
 
 # Función para imprimir facturas
@@ -563,37 +675,9 @@ def imprimir_factura(id_venta, es_copia=False):
     import webbrowser
     import os
 
-    # Consulta los datos de la venta
-    conn = sqlite3.connect("ikigai_inventario.db")
-    cursor = conn.cursor()
-
     # Datos de la venta
-    cursor.execute("""
-        SELECT
-            v.id_venta,
-            v.fecha,
-            c.nombre,
-            c.direccion,
-            c.identificacion_fiscal,
-            v.total,
-            v.tipo_documento,
-            t.nombre AS tienda_nombre,
-            t.direccion AS tienda_direccion,
-            t.identificacion_fiscal AS tienda_identificacion_fiscal,
-            v.descuento,
-            v.subtotal,
-            v.impuesto
-        FROM
-            Ventas v
-        JOIN
-            Clientes c ON v.id_cliente = c.id_cliente
-        CROSS JOIN
-            Tienda t
-        WHERE
-            v.id_venta = ?
-    """, (id_venta,))
-
-    venta_data = cursor.fetchone()
+    venta_data = datos_de_la_venta(id_venta)
+    
     if not venta_data:
         messagebox.showerror("Error", "No se encontró la venta.")
         return
@@ -615,14 +699,7 @@ def imprimir_factura(id_venta, es_copia=False):
         
 
     # Detalles de la venta
-    cursor.execute("""
-        SELECT p.codigo, dv.cantidad, dv.precio_unitario, dv.subtotal
-        FROM Detalle_Venta dv
-        JOIN Productos p ON dv.id_producto = p.id_producto
-        WHERE dv.id_venta = ?
-    """, (id_venta,))
-    detalles = cursor.fetchall()
-    conn.close()
+    detalles = detalle_de_la_venta(id_venta)
 
     # Preguntar al usuario si desea una copia de la factura
     if not es_copia:
@@ -665,7 +742,7 @@ def imprimir_factura(id_venta, es_copia=False):
     story = []
 
     # Logo de la tienda
-    logo_path = "Img/logo/logo_ikigai.png"
+    logo_path = LOGO_PATH
 
     # Título del documento
     if tipo_documento == "notaentrega":  # correcto es nota_entrega
@@ -752,8 +829,8 @@ def imprimir_factura(id_venta, es_copia=False):
     def header_footer(canvas, doc):
         # Header con logo
         if logo_path and os.path.exists(logo_path):
-            logo = Image(logo_path, width=90, height=40)
-            logo.drawOn(canvas, 50, letter[1] - 70)
+            logo = Image(logo_path, width=120, height=60)
+            logo.drawOn(canvas, 50, letter[1] - 120) # Antes -70
 
         # Marca de agua "COPIA" si es una copia
         if es_copia:
@@ -791,34 +868,7 @@ def imprimir_nota_entrega(id_nota_entrega, es_copia=False):
     import os
 
     # Consulta los datos de la nota de entrega
-    conn = sqlite3.connect("ikigai_inventario.db")
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT
-            ne.id_nota_entrega,
-            ne.fecha,
-            c.nombre,
-            c.direccion,
-            c.identificacion_fiscal,
-            ne.total,
-            ne.subtotal,
-            ne.descuento,
-            ne.impuesto,
-            t.nombre AS tienda_nombre,
-            t.direccion AS tienda_direccion,
-            t.identificacion_fiscal AS tienda_identificacion_fiscal
-        FROM
-            NotasEntrega ne
-        JOIN
-            Clientes c ON ne.id_cliente = c.id_cliente
-        CROSS JOIN
-            Tienda t
-        WHERE
-            ne.id_nota_entrega = ?
-    """, (id_nota_entrega,))
-
-    nota_data = cursor.fetchone()
+    nota_data = datos_nota_entrega(id_nota_entrega,)
 
     if not nota_data:
         messagebox.showerror("Error", "No se encontró la nota de entrega.")
@@ -828,24 +878,16 @@ def imprimir_nota_entrega(id_nota_entrega, es_copia=False):
     total, subtotal, descuento, impuesto, tienda_nombre, tienda_direccion, tienda_identificacion_fiscal) = nota_data
 
     # Detalles de la nota de entrega
-    cursor.execute("""
-        SELECT p.codigo, dne.cantidad, dne.precio_unitario, dne.subtotal
-        FROM DetalleNotaEntrega dne
-        JOIN Productos p ON dne.id_producto = p.id_producto
-        WHERE dne.id_nota_entrega = ?
-    """, (id_nota_entrega,))
-
-    detalles = cursor.fetchall()
-    conn.close()
+    detalles = detalle_nota_entrega(id_nota_entrega,)
 
     # Ruta del archivo PDF
     try:
         if es_copia:
-            os.makedirs("factura_copia", exist_ok=True)
-            ruta_pdf = f"factura_copia/factura_{id_nota_entrega}_COPIA.pdf"
+            os.makedirs("notas_entrega_copia", exist_ok=True)
+            ruta_pdf = f"notas_entrega_copia/factura_{id_nota_entrega}_COPIA.pdf"
         else:
-            os.makedirs("factura_original", exist_ok=True)
-            ruta_pdf = f"factura_original/factura_{id_nota_entrega}.pdf"
+            os.makedirs("notas_entrega", exist_ok=True)
+            ruta_pdf = f"notas_entrega/factura_{id_nota_entrega}.pdf"
     except Exception as e:
         messagebox.showerror("Error", "Error al guardar la factura en carpeta.")
     
@@ -890,7 +932,7 @@ def imprimir_nota_entrega(id_nota_entrega, es_copia=False):
     story = []
 
     # Logo de la tienda
-    logo_path = "Img/logo/logo_ikigai.png"
+    logo_path = LOGO_PATH
 
     # Título de la nota de entrega
     titulo_doc = f"LIEFERSCHEIN: {id_nota_entrega}"
@@ -973,8 +1015,8 @@ def imprimir_nota_entrega(id_nota_entrega, es_copia=False):
     # Función para agregar header y footer
     def header_footer(canvas, doc):
         if logo_path and os.path.exists(logo_path):
-            logo = Image(logo_path, width=90, height=40)
-            logo.drawOn(canvas, 50, letter[1] - 70)
+            logo = Image(logo_path, width=120, height=60)
+            logo.drawOn(canvas, 50, letter[1] - 120)
 
         # Marca de agua "COPIA" si es una copia
         if es_copia:

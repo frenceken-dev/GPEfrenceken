@@ -1,11 +1,33 @@
 # costos_ganacias.py
 import tkinter as tk
 from tkinter import ttk, messagebox, Toplevel
-from tkcalendar import Calendar
-from db import calcular_costo_produccion, obtener_productos_para_costoventa, actualizar_precio_venta, datos_costo_d_producto_actualizar, actualizar_costo_producto, registrar_historial_costo,registrar_producto_en_lote, obtener_lotes, obtener_lotes_con_productos, obtener_costo_actual_lote
-#from historial import abrir_actualizar_historial, mostrar_historial_costos, mostrar_historial_ganancias
+from tkcalendar import Calendar 
 from inventario import convertir_a_float
-from db import obtener_productos_para_acthistorial, guardar_historial, obtener_productos_para_costoventa, mostrar_historial_costos_por_producto, mostrar_historial_costos_general, mostrar_historial_ganancias_producto, mostrar_historial_general_mensual, datos_imprimir_historial_costo, datos_imprimir_historial_ganancia
+from db import (
+    obtener_productos_para_acthistorial, 
+    guardar_historial, 
+    obtener_productos_para_costoventa, 
+    mostrar_historial_costos_por_producto, 
+    mostrar_historial_costos_general, 
+    mostrar_historial_ganancias_producto,
+    mostrar_historial_general_mensual, 
+    datos_imprimir_historial_costo, 
+    datos_imprimir_historial_ganancia,
+    calcular_costo_produccion, 
+    obtener_productos_para_costoventa, 
+    actualizar_precio_venta, 
+    datos_costo_d_producto_actualizar, 
+    actualizar_costo_producto, 
+    registrar_historial_costo,registrar_producto_en_lote, 
+    obtener_lotes, 
+    obtener_lotes_con_productos, 
+    obtener_costo_actual_lote,
+    insertar_lote,
+    insertar_lote_productos,
+    actualizar_costo_lote,
+    costo_anterior_lote,
+    actualiza_precio_venta_lote,
+    )
 
 
 # Actualizar los costos por unidad
@@ -644,15 +666,8 @@ def guardar_nuevo_lote(descripcion, unidades_str, productos_seleccionados, canti
             messagebox.showerror("Error", "Debes seleccionar al menos un producto.")
             return
 
-        conn = sqlite3.connect('ikigai_inventario.db')
-        cursor = conn.cursor()
-
         # Insertar el lote en la tabla Lotes
-        cursor.execute(
-            "INSERT INTO Lotes (fecha_creacion, descripcion, cantidad_unidades, costo_lote) VALUES (?, ?, ?, ?)",
-            (datetime.now().strftime("%Y-%m-%d"), descripcion, unidades, costo_lote)
-        )
-        id_lote = cursor.lastrowid  # Obtener el ID del lote recién creado
+        id_lote = insertar_lote(descripcion, unidades, costo_lote)
 
         # Insertar los productos en la tabla Lote_Productos
         for producto_str in productos_seleccionados:
@@ -660,14 +675,9 @@ def guardar_nuevo_lote(descripcion, unidades_str, productos_seleccionados, canti
             producto = next((prod for prod in obtener_productos_para_costoventa() if prod[1] == codigo_producto), None)
             if producto:
                 id_producto = producto[0]
-                cursor.execute(
-                    "INSERT INTO Lote_Productos (id_lote, id_producto, cantidad_asignada) VALUES (?, ?, ?)",
-                    (id_lote, id_producto, cantidad)
-                )
-
-        conn.commit()
-        conn.close()
-
+                # insertar productos en la tabla lote_productos
+                insertar_lote_productos(id_lote, id_producto, cantidad)
+                
         messagebox.showinfo("Éxito", "El lote se ha creado correctamente.")
         window.destroy()
     except ValueError:
@@ -696,18 +706,10 @@ def actualizar_costo_de_lote(nuevo_costo_str, recalcular_precio, metodo, paramet
             id_lote = int(lote_str.split(" - ")[0])
 
             # Actualizar el costo del lote en la base de datos
-            conn = sqlite3.connect('ikigai_inventario.db')
-            cursor = conn.cursor()
-            cursor.execute("UPDATE Lotes SET costo_lote = ? WHERE id_lote = ?", (nuevo_costo, id_lote))
-            conn.commit()
-            conn.close()
+            actualizar_costo_lote(nuevo_costo, id_lote)
 
             # Obtener el costo anterior del lote
-            conn = sqlite3.connect('ikigai_inventario.db')
-            cursor = conn.cursor()
-            cursor.execute("SELECT costo_lote FROM Lotes WHERE id_lote = ?", (id_lote,))
-            costo_anterior = cursor.fetchone()[0]
-            conn.close()
+            costo_anterior = costo_anterior_lote(id_lote,)
 
             # Recalcular el precio de venta si el usuario lo desea
             if recalcular_precio:
@@ -729,11 +731,7 @@ def actualizar_costo_de_lote(nuevo_costo_str, recalcular_precio, metodo, paramet
                     nuevo_precio = nuevo_costo + (nuevo_costo * 1) * parametro
 
                 # Actualizar el precio de venta del lote en la base de datos
-                conn = sqlite3.connect('ikigai_inventario.db')
-                cursor = conn.cursor()
-                cursor.execute("UPDATE Lotes SET precio_venta_lote = ? WHERE id_lote = ?", (nuevo_precio, id_lote))
-                conn.commit()
-                conn.close()
+                actualiza_precio_venta_lote(nuevo_precio, id_lote)
 
                 messagebox.showinfo(
                     "Éxito",

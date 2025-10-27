@@ -3,7 +3,14 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox, simpledialog
-from db import obtener_nombres_proveedores, insertar_factura, insertar_material, obtener_id_proveedor_por_nombre, obtener_id_factura_por_numero, obtener_id_material_por_codigo, insertar_detalle_factura
+from db import (
+    obtener_nombres_proveedores, 
+    insertar_factura, insertar_material, 
+    obtener_id_proveedor_por_nombre, 
+    obtener_id_factura_por_numero, 
+    obtener_id_material_por_codigo, 
+    insertar_detalle_factura
+)
 
 
 # Variables globales para almacenar datos temporales
@@ -298,7 +305,7 @@ def guardar_factura_y_materiales(frame_contenido):
     except Exception as e:
         messagebox.showerror("Error", f"No se pudo guardar: {e}")
         
-
+        
 # Esta función cambia la coma por el punto si el usuario usa coma.
 def convertir_a_float(valor_str):
     try:

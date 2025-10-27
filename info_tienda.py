@@ -6,7 +6,7 @@ from db import guardar_info_tienda, actualizar_datos_tienda, datos_registrados_t
 
 
 
-def info_tienda(root, mostrar_menu_principal, imagen_panel_tk):
+def info_tienda(root, mostrar_menu_principal, imagen_tk, imagen_panel_tk):
      # Limpiar el frame de cualquier contenido
     for widget in root.winfo_children():
         widget.destroy()
@@ -19,21 +19,21 @@ def info_tienda(root, mostrar_menu_principal, imagen_panel_tk):
     frame_titulo = tk.Frame(frame_contenido, bg="#a0b9f0")
     frame_titulo.pack(side=tk.TOP, fill=tk.X, pady=15)
     
+    frame_imagen = tk.Frame(frame_contenido, bg="#a0b9f0")
+    frame_imagen.pack(expand=True)
+        
+    if imagen_tk:
+        tk.Label(frame_imagen, image=imagen_tk, bg="#a0b9f0").pack(pady=20)
+    else:
+        tk.Label(frame_imagen, text="Ikigai Designs", font=("Arial", 24), bg="#a0b9f0").pack(pady=20)
+            
     # Frame para los botones (lado izquierdo)
     frame_botones = tk.Frame(root, bg="#2C3E50", width=200, height=800)
     frame_botones.pack(side=tk.LEFT, fill=tk.Y)
-    frame_botones.pack_propagate(False)        
+    frame_botones.pack_propagate(False)
     
     frame_imagen_panel = tk.Frame(frame_botones, bg="#2C3E50", height=70)
     frame_imagen_panel.pack(side=tk.BOTTOM, fill=tk.X, pady=10)
-        
-    # Imagen del Logo para el panel izquierdo
-    if imagen_panel_tk:
-        label_imagen = tk.Label(frame_imagen_panel, image=imagen_panel_tk, bg="#2C3E50")
-        label_imagen.pack(side=tk.LEFT, padx=70)
-    else:
-        label_texto = tk.Label(frame_imagen_panel, text="Ikigai", font=("Arial", 10), bg="#2C3E50")
-        label_texto.pack(side=tk.LEFT, padx=30)
     
     # Título
     title_label = tk.Label(
@@ -55,9 +55,9 @@ def info_tienda(root, mostrar_menu_principal, imagen_panel_tk):
         relief=tk.FLAT,
         activebackground="#2ECC71",
         activeforeground="white",
-        command=lambda: ingresar_datos_tienda(frame_contenido, mostrar_menu_principal),
+        command=lambda: ingresar_datos_tienda(frame_contenido, frame_imagen_panel, imagen_panel_tk, mostrar_menu_principal),
         width=18
-    ).pack(pady=10)
+    ).pack(pady=15)
     # Actualiza los datos del negocio
     tk.Button(
         frame_botones,
@@ -71,7 +71,7 @@ def info_tienda(root, mostrar_menu_principal, imagen_panel_tk):
         activeforeground="white",
         command=lambda: actualizar_tienda(frame_contenido, mostrar_menu_principal),
         width=18
-    ).pack(pady=10)
+    ).pack(pady=15)
     # Volver al menu Pricipal
     tk.Button(
         frame_botones,
@@ -85,10 +85,10 @@ def info_tienda(root, mostrar_menu_principal, imagen_panel_tk):
         activeforeground="white",
         command=mostrar_menu_principal,
         width=18
-    ).pack(pady=10)
+    ).pack(side=tk.LEFT, padx=30, pady=40)
         
         
-def ingresar_datos_tienda(frame_contenido, mostrar_menu_principal):
+def ingresar_datos_tienda(frame_contenido, frame_imagen_panel, imagen_panel_tk, mostrar_menu_principal):
     # Limpiar el frame principal
     for widget in frame_contenido.winfo_children():
         widget.destroy()
@@ -96,6 +96,14 @@ def ingresar_datos_tienda(frame_contenido, mostrar_menu_principal):
     # Frame principal
     frame = tk.Frame(frame_contenido, bg="#a0b9f0", width=600, height=800)
     frame.pack(fill=tk.BOTH, expand=True)
+        
+    # Imagen del Logo para el panel izquierdo
+    if imagen_panel_tk:
+        label_imagen = tk.Label(frame_imagen_panel, image=imagen_panel_tk, bg="#2C3E50")
+        label_imagen.pack(side=tk.LEFT, padx=70)
+    else:
+        label_texto = tk.Label(frame_imagen_panel, text="Ikigai", font=("Arial", 10), bg="#2C3E50")
+        label_texto.pack(side=tk.LEFT, padx=30)
     
     # Frame para los controles
     control_frame = tk.Frame(frame, bg="#a0b9f0", padx=20, pady=10)

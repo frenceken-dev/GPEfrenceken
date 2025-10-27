@@ -2,7 +2,20 @@
 
 import tkinter as tk
 from tkinter import messagebox, simpledialog
-from db import insertar_producto, obtener_materiales, actualizar_stock_material, insertar_detalle_producto, obtener_id_producto_por_codigo, obtener_id_material_por_codigo, obtener_costo_unitario_material, obtener_codigo_material_por_nombre_color_tipo_tamaño, obtener_nombre_material_por_codigo, obtener_tipos_por_material_y_color, obtener_tamaños_por_material_color_tipo, obtener_color_por_material
+from db import (
+    insertar_producto, 
+    obtener_materiales, 
+    actualizar_stock_material, 
+    insertar_detalle_producto, 
+    obtener_id_producto_por_codigo, 
+    obtener_id_material_por_codigo, 
+    obtener_costo_unitario_material, 
+    obtener_codigo_material_por_nombre_color_tipo_tamaño, 
+    obtener_nombre_material_por_codigo, 
+    obtener_tipos_por_material_y_color, 
+    obtener_tamaños_por_material_color_tipo, 
+    obtener_color_por_material
+)
 from tkinter import ttk
 from inventario import convertir_a_float
 
