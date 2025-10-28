@@ -90,8 +90,17 @@ def abrir_actualizar_costo_por_unidad(root, mostrar_menu_principal, imagen_panel
     product_label.pack(anchor=tk.W, pady=(0, 5))
 
     productos = obtener_productos_para_costoventa()
+    
+    # Verificar si la lista de productos está vacía
+    if not productos:
+        tk.Label(center_frame, text="Actualmente no hay productos registrados.", font=("Arial", 12)).pack(pady=20)
+        messagebox.showwarning("Advertencia", "No hay datos que mostrar en este momento")
+        tk.Button(center_frame, text="Volver al Menú", command=abrir_modulo_costos_ganancias(root, mostrar_menu_principal, imagen_panel_tk, rol, imagen_tk), font=("Arial", 10)).pack(pady=10)
+        return
+    
     producto_vars = [f"{prod[1]} (Costo actual: €{prod[2]:.2f})" for prod in productos]
     producto_var = tk.StringVar()
+    producto_var.set("Seleccione un producto")
     producto_dropdown = tk.OptionMenu(center_frame, producto_var, *producto_vars)
     producto_dropdown.config(
         bg="#FFFFFF",
@@ -1122,6 +1131,14 @@ def mostrar_historial_costos(root, mostrar_menu_principal, imagen_panel_tk, rol,
     producto_label.pack(anchor=tk.W, pady=(0, 5))
 
     productos = obtener_productos_para_costoventa()
+    
+    # Verificar si la lista de productos está vacía
+    if not productos:
+        tk.Label(center_frame, text="Actualmente no hay productos registrados.", font=("Arial", 12)).pack(pady=20)
+        messagebox.showwarning("Advertencia", "No hay datos que mostrar en este momento")
+        tk.Button(center_frame, text="Volver al Menú", command=abrir_modulo_costos_ganancias(root, mostrar_menu_principal, imagen_panel_tk, rol, imagen_tk), font=("Arial", 10)).pack(pady=10)
+        return
+    
     producto_vars = [f"{prod[1]}" for prod in productos]
     producto_var = tk.StringVar()
     producto_dropdown = tk.OptionMenu(producto_frame, producto_var, *producto_vars)
@@ -1347,8 +1364,17 @@ def mostrar_historial_ganancias(root, mostrar_menu_principal, imagen_panel_tk, r
     producto_label.pack(anchor=tk.W, pady=(0, 5))
 
     productos = obtener_productos_para_costoventa()
+    
+    # Verificar si la lista de productos está vacía
+    if not productos:
+        tk.Label(center_frame, text="Actualmente no hay productos registrados.", font=("Arial", 12)).pack(pady=20)
+        messagebox.showwarning("Advertencia", "No hay datos que mostrar en este momento")
+        tk.Button(center_frame, text="Volver al Menú", command=abrir_modulo_costos_ganancias(root, mostrar_menu_principal, imagen_panel_tk, rol, imagen_tk), font=("Arial", 10)).pack(pady=10)
+        return
+    
     producto_vars = [f"{prod[1]}" for prod in productos]
     producto_var = tk.StringVar()
+    producto_var.set("producto_especifico")
     producto_dropdown = tk.OptionMenu(producto_frame, producto_var, *producto_vars)
     producto_dropdown.config(
         bg="#FFFFFF",
